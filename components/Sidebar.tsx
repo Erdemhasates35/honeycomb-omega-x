@@ -10,17 +10,23 @@ import {
   HeartPulse,
   Settings,
   Hexagon,
+  Key,
+  Terminal,
+  CandlestickChart,
 } from "lucide-react";
 import clsx from "clsx";
 
 const items = [
   { id: "dashboard", label: "Dashboard", icon: LayoutDashboard },
+  { id: "trade", label: "Trade Desk", icon: CandlestickChart },
   { id: "positions", label: "Positions", icon: Briefcase },
   { id: "signals", label: "Signals & Edge", icon: Activity },
   { id: "risk", label: "Risk State", icon: Shield },
   { id: "agents", label: "Agents (19+)", icon: Bot },
   { id: "execution", label: "Execution", icon: Zap },
   { id: "selfhealing", label: "Self-Healing", icon: HeartPulse },
+  { id: "logs", label: "Live Logs", icon: Terminal },
+  { id: "admin", label: "Admin & Keys", icon: Key },
   { id: "settings", label: "Settings", icon: Settings },
 ] as const;
 
@@ -44,7 +50,7 @@ export default function Sidebar({ active, onSelect }: Props) {
         </div>
       </div>
 
-      <nav className="flex-1 space-y-1 p-3">
+      <nav className="flex-1 space-y-1 overflow-y-auto p-3">
         {items.map((item) => {
           const Icon = item.icon;
           const isActive = active === item.id;
