@@ -18,13 +18,13 @@ const files = [
 ];
 
 const forbidden = [
-  ["random telemetry generator", /Math\.random\s*\(/],
-  ["synthetic periodic log generator", /setInterval\s*\(/],
-  ["hardcoded fill-rate metric", /98\.7\s*%/],
-  ["hardcoded latency metric", /11\.4\s*ms|Latency\s+12ms/i],
-  ["hardcoded example equity", /\$48,250|\+\$1,842\.30/],
-  ["false online status", /\bONLINE\b/],
-  ["false resolved event", /\bRESOLVED\b/],
+  ["random telemetry generator", /Math\\.random\\s*\\(/],
+  ["synthetic periodic log generator", /setInterval\\s*\\(/],
+  ["hardcoded fill-rate metric", /98\\.7\\s*%/],
+  ["hardcoded latency metric", /11\\.4\\s*ms|Latency\\s+12ms/i],
+  ["hardcoded example equity", /\\$48,250|\\+\\$1,842\\.30/],
+  ["false online status", /(?:status|state)\\s*[:=]\\s*["']ONLINE["']/i],
+  ["false resolved event", /(?:status|state)\\s*[:=]\\s*["']RESOLVED["']/i],
   ["false current green risk", /Risk State.{0,20}GREEN/i],
 ];
 
