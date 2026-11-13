@@ -24,7 +24,7 @@ This repository currently contains a **frontend control-plane scaffold**, not a 
 - Deployment/configuration status
 
 ## Local development
-Requires Node.js compatible with the pinned Next.js 14.2.5 dependency.
+Requires Node.js compatible with the Next.js 14.2.5 version range declared in package.json.
 
     npm install
     npm run typecheck
