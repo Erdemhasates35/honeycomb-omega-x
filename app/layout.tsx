@@ -3,7 +3,7 @@ import "./globals.css";
 
 export const metadata: Metadata = {
   title: "α-HONEYCOMB OMEGA X∞ | Quant Control Plane",
-  description: "Corporate Autonomous Quant Execution Platform — Edge Engine • Risk State Machine • Multi-Agent",
+  description: "Quant control-plane UI scaffold. Live telemetry and execution adapters are not connected.",
 };
 
 export default function RootLayout({
