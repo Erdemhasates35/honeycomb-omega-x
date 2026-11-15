@@ -26,13 +26,18 @@ const forbidden = [
   ["false online status", /(?:status|state)\s*[:=]\s*["']ONLINE["']/i],
   ["false resolved event", /(?:status|state)\s*[:=]\s*["']RESOLVED["']/i],
   ["false current green risk", /Risk State.{0,20}GREEN/i],
+  ["fake profit claim", /profitability|24\/7 availability|autonomous operation/i],
 ];
 
 const failures = [];
 for (const file of files) {
-  const source = readFileSync(file, "utf8");
-  for (const [label, pattern] of forbidden) {
-    if (pattern.test(source)) failures.push(file + ": " + label);
+  try {
+    const source = readFileSync(file, "utf8");
+    for (const [label, pattern] of forbidden) {
+      if (pattern.test(source)) failures.push(file + ": " + label);
+    }
+  } catch (e) {
+    // file may not exist yet; skip
   }
 }
 if (failures.length) {
