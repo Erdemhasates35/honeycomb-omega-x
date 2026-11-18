@@ -1,5 +1,6 @@
 import { createHmac } from "node:crypto";
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
+import { createServerClient } from "@/lib/supabase/server";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -36,7 +37,6 @@ async function binanceGet<T>(path: string, apiKey: string, secret: string): Prom
 
 type BinanceAccount = {
   totalWalletBalance: string;
-  totalUn unrealizedProfit?: string;
   totalMarginBalance: string;
   availableBalance: string;
   assets: Array<{ asset: string; walletBalance: string; unrealizedProfit: string; availableBalance: string }>;
@@ -51,11 +51,26 @@ type BinancePosition = {
   positionSide: string;
 };
 
-export async function GET() {
-  const apiKey = process.env.BINANCE_API_KEY;
-  const secret = process.env.BINANCE_SECRET_KEY;
+export async function GET(_request: NextRequest) {
   const sampledAt = new Date().toISOString();
 
+  let user;
+  try {
+    const supabase = await createServerClient();
+    const result = await supabase.auth.getUser();
+    user = result.data.user;
+  } catch {
+    user = null;
+  }
+  if (!user) {
+    return NextResponse.json(
+      { status: "unauthorized", venue: "BINANCE_USDM", sampledAt, message: "Sign in is required to view private exchange account data." },
+      { status: 401, headers: { "Cache-Control": "no-store, max-age=0" } }
+    );
+  }
+
+  const apiKey = process.env.BINANCE_API_KEY;
+  const secret = process.env.BINANCE_SECRET_KEY;
   if (!apiKey || !secret) {
     return NextResponse.json(
       { status: "not_configured", venue: "BINANCE_USDM", sampledAt, message: "Server-side Binance read credentials are not configured." },
