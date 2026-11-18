@@ -1,7 +1,8 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, type FormEvent } from "react";
 import type { HealthResponse } from "@/lib/backend/types";
+import { getBrowserClient } from "@/lib/supabase/client";
 
 type MarketResponse = {
   status: "connected" | "unavailable";
@@ -39,6 +40,37 @@ export default function Dashboard() {
   const [market, setMarket] = useState<MarketResponse | null>(null);
   const [account, setAccount] = useState<AccountResponse | null>(null);
   const [loading, setLoading] = useState(true);
+  const [operatorEmail, setOperatorEmail] = useState<string | null>(null);
+  const [loginEmail, setLoginEmail] = useState("");
+  const [authMessage, setAuthMessage] = useState("");
+  const [authBusy, setAuthBusy] = useState(false);
+
+  useEffect(() => {
+    const supabase = getBrowserClient();
+    void supabase.auth.getUser().then(({ data }) => setOperatorEmail(data.user?.email ?? null));
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      setOperatorEmail(session?.user?.email ?? null);
+    });
+    return () => subscription.unsubscribe();
+  }, []);
+
+  const requestLoginLink = async (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    if (!loginEmail.trim()) return;
+    setAuthBusy(true);
+    setAuthMessage("");
+    const { error } = await getBrowserClient().auth.signInWithOtp({
+      email: loginEmail.trim(),
+      options: { shouldCreateUser: false, emailRedirectTo: window.location.origin },
+    });
+    setAuthMessage(error ? error.message : "Giriş bağlantısı kayıtlı e-posta adresine gönderildi.");
+    setAuthBusy(false);
+  };
+
+  const signOut = async () => {
+    await getBrowserClient().auth.signOut();
+    setAccount({ status: "unauthorized", sampledAt: new Date().toISOString(), message: "Sign in is required to view private exchange account data." });
+  };
 
   useEffect(() => {
     let cancelled = false;
@@ -119,6 +151,26 @@ export default function Dashboard() {
         ) : (
           <p className="text-sm text-zinc-500">{market?.message ?? "No market data received."}</p>
         )}
+      </div>
+
+      <div className="rounded-xl border border-honeycomb-border bg-honeycomb-panel p-5">
+        <div className="mb-3 flex items-center justify-between gap-3">
+          <h2 className="text-sm font-semibold text-white">Operator Session</h2>
+          {operatorEmail ? (
+            <button type="button" onClick={() => void signOut()} className="rounded-md border border-honeycomb-border px-3 py-1.5 text-xs text-zinc-300 hover:bg-white/5">Sign out</button>
+          ) : null}
+        </div>
+        {operatorEmail ? (
+          <p className="text-sm text-emerald-400">Authenticated operator: {operatorEmail}</p>
+        ) : (
+          <form onSubmit={requestLoginLink} className="flex flex-wrap items-center gap-2">
+            <input type="email" required value={loginEmail} onChange={(event) => setLoginEmail(event.target.value)} placeholder="Registered operator email" className="min-w-0 flex-1 rounded-md border border-honeycomb-border bg-honeycomb-bg px-3 py-2 text-sm text-white outline-none focus:border-honeycomb-accent" />
+            <button type="submit" disabled={authBusy} className="rounded-md bg-honeycomb-accent px-3 py-2 text-xs font-semibold text-white disabled:opacity-50">
+              {authBusy ? "Sending…" : "Send sign-in link"}
+            </button>
+          </form>
+        )}
+        {authMessage ? <p className="mt-2 text-xs text-zinc-400">{authMessage}</p> : null}
       </div>
 
       <div className="rounded-xl border border-honeycomb-border bg-honeycomb-panel p-5">
