@@ -10,7 +10,7 @@ type MarketResponse = {
   message?: string;
 };
 type AccountResponse = {
-  status: "connected" | "unavailable" | "not_configured";
+  status: "connected" | "unavailable" | "not_configured" | "unauthorized";
   sampledAt: string;
   account?: {
     totalWalletBalance: number;
@@ -42,6 +42,7 @@ export default function Dashboard() {
 
   useEffect(() => {
     let cancelled = false;
+    let timer: number | undefined;
     const refresh = async () => {
       const results = await Promise.allSettled([
         fetch("/api/health", { cache: "no-store" }).then((res) => res.json() as Promise<HealthResponse>),
@@ -53,19 +54,19 @@ export default function Dashboard() {
       if (results[1].status === "fulfilled") setMarket(results[1].value);
       if (results[2].status === "fulfilled") setAccount(results[2].value);
       setLoading(false);
+      timer = window.setTimeout(() => void refresh(), 10000);
     };
     void refresh();
-    const timer = window.setInterval(() => void refresh(), 10000);
     return () => {
       cancelled = true;
-      window.clearInterval(timer);
+      if (timer !== undefined) window.clearTimeout(timer);
     };
   }, []);
 
   const services = [
     ["Supabase", health?.supabase ? "CONNECTED" : "NOT CONNECTED"],
     ["Binance market feed", market?.status === "connected" ? "CONNECTED" : "NOT CONNECTED"],
-    ["Binance account", account?.status === "connected" ? "CONNECTED" : account?.status === "not_configured" ? "NOT CONFIGURED" : "UNAVAILABLE"],
+    ["Binance account", account?.status === "connected" ? "CONNECTED" : account?.status === "not_configured" ? "NOT CONFIGURED" : account?.status === "unauthorized" ? "SIGN IN REQUIRED" : "UNAVAILABLE"],
     ["Risk service", "NOT CONNECTED"],
     ["Execution service", "DISABLED"],
     ["Agent runtime", "NOT CONNECTED"],
@@ -77,7 +78,7 @@ export default function Dashboard() {
       <div>
         <h1 className="text-xl font-semibold text-white">Control Plane</h1>
         <p className="mt-1 text-sm text-zinc-400">
-          Live Binance USDⓈ-M market feed and read-only account telemetry. Order execution is not connected.
+          Live Binance USDⓈ-M market feed and authenticated read-only account telemetry. Order execution is not connected.
         </p>
       </div>
 
