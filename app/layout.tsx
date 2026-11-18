@@ -3,7 +3,8 @@ import "./globals.css";
 
 export const metadata: Metadata = {
   title: "α-HONEYCOMB OMEGA X∞ | Quant Control Plane",
-  description: "Quant control-plane UI scaffold. Live telemetry and execution adapters are not connected.",
+  description:
+    "Live Binance USDⓈ-M market data, authenticated read-only account telemetry, and a fail-closed execution control plane.",
 };
 
 export default function RootLayout({
