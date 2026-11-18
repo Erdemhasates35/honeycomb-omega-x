@@ -7,7 +7,7 @@ Updated: 2026-11-19
 - Next.js production build and GitHub Actions typecheck/build workflow pass on commit `376d499ca84f6289fdeafc4b8849dd546cce90e1`.
 - Vercel production deployment is live.
 - `GET /api/health` returns HTTP 200 and confirms Supabase Auth reachability.
-- `GET /api/market` is implemented as a server-side Binance USDⓈ-M public market-data adapter.
+- `GET /api/market` is implemented as server-side Binance USDⓈ-M and Bitget USDT-Futures public market-data adapters.
 - `GET /api/exchange/binance/account` is implemented as an authenticated, signed, read-only Binance account adapter.
 - The account adapter does not submit, amend or cancel orders.
 - UI avoids fabricated metrics and keeps trade commands disabled.
@@ -20,7 +20,9 @@ Updated: 2026-11-19
 
 ## Exchange state
 
-- Binance public market feed is implemented; production HTTP validation is pending after the Europe-region deployment.
+- Binance public market feed is production-verified with HTTP 200 and live ticker values.
+- Bitget USDT-Futures public market feed is implemented; production response verification is pending.
+- Private Bitget account access is not configured.
 - Private Binance account endpoint requires a Supabase-authenticated session and server-side `BINANCE_API_KEY` / `BINANCE_SECRET_KEY` with USDⓈ-M Futures read permission.
 - Account endpoint has not yet been validated against an authenticated Binance account session.
 - No Bitget account integration has been configured or verified.
