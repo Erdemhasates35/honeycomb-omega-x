@@ -20,8 +20,7 @@ Updated: 2026-11-19
 
 ## Exchange state
 
-- Binance public market feed is production-verified with HTTP 200 and live ticker values.
-- Bitget USDT-Futures public market feed is implemented; production response verification is pending.
+- Binance USDⓈ-M and Bitget USDT-Futures public market feeds are production-verified: `/api/market` returns HTTP 200, both venues report `connected`, and five matched symbols are returned from each exchange.
 - Private Bitget account access is not configured.
 - Private Binance account endpoint requires a Supabase-authenticated session and server-side `BINANCE_API_KEY` / `BINANCE_SECRET_KEY` with USDⓈ-M Futures read permission.
 - Account endpoint has not yet been validated against an authenticated Binance account session.
