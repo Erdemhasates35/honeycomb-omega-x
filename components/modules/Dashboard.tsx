@@ -5,9 +5,11 @@ import type { HealthResponse } from "@/lib/backend/types";
 import { getBrowserClient } from "@/lib/supabase/client";
 
 type MarketResponse = {
-  status: "connected" | "unavailable";
+  status: "connected" | "degraded" | "unavailable";
   sampledAt: string;
+  venues?: { binance: "connected" | "unavailable"; bitget: "connected" | "unavailable" };
   tickers: Array<{ symbol: string; price: number; source: string; sampledAt: string }>;
+  bitgetTickers?: Array<{ symbol: string; price: number; source: string; sampledAt: string }>;
   message?: string;
 };
 type AccountResponse = {
@@ -97,7 +99,8 @@ export default function Dashboard() {
 
   const services = [
     ["Supabase", health?.supabase ? "CONNECTED" : "NOT CONNECTED"],
-    ["Binance market feed", market?.status === "connected" ? "CONNECTED" : "NOT CONNECTED"],
+    ["Binance market feed", market?.venues?.binance === "connected" ? "CONNECTED" : "NOT CONNECTED"],
+    ["Bitget market feed", market?.venues?.bitget === "connected" ? "CONNECTED" : "NOT CONNECTED"],
     ["Binance account", account?.status === "connected" ? "CONNECTED" : account?.status === "not_configured" ? "NOT CONFIGURED" : account?.status === "unauthorized" ? "SIGN IN REQUIRED" : "UNAVAILABLE"],
     ["Risk service", "NOT CONNECTED"],
     ["Execution service", "DISABLED"],
@@ -116,7 +119,7 @@ export default function Dashboard() {
 
       <div className="rounded-xl border border-honeycomb-yellow/30 bg-honeycomb-yellow/5 p-4">
         <div className="text-sm font-semibold text-honeycomb-yellow">
-          {loading ? "CHECKING CONNECTIVITY…" : market?.status === "connected" ? "BINANCE MARKET FEED ONLINE — EXECUTION DISABLED" : "MARKET FEED UNAVAILABLE — EXECUTION DISABLED"}
+          {loading ? "CHECKING CONNECTIVITY…" : market?.status === "connected" ? "BINANCE + BITGET MARKET FEEDS ONLINE — EXECUTION DISABLED" : market?.status === "degraded" ? "PARTIAL EXCHANGE MARKET DATA — EXECUTION DISABLED" : "MARKET FEEDS UNAVAILABLE — EXECUTION DISABLED"}
         </div>
         <p className="mt-1 text-sm text-zinc-400">
           {market?.message ?? health?.message ?? "Waiting for live service probes…"}
@@ -150,6 +153,25 @@ export default function Dashboard() {
           </div>
         ) : (
           <p className="text-sm text-zinc-500">{market?.message ?? "No market data received."}</p>
+        )}
+      </div>
+
+      <div className="rounded-xl border border-honeycomb-border bg-honeycomb-panel p-5">
+        <div className="mb-4 flex items-center justify-between">
+          <h2 className="text-sm font-semibold text-white">Bitget USDT-Futures Live Prices</h2>
+          <span className="text-xs text-zinc-500">{market?.sampledAt ?? "Awaiting feed"}</span>
+        </div>
+        {market?.bitgetTickers?.length ? (
+          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-5">
+            {market.bitgetTickers.map((ticker) => (
+              <div key={ticker.symbol} className="rounded-lg bg-honeycomb-bg px-4 py-3">
+                <div className="text-xs text-zinc-400">{ticker.symbol}</div>
+                <div className="mt-1 font-mono text-lg font-semibold text-white">{money(ticker.price)}</div>
+              </div>
+            ))}
+          </div>
+        ) : (
+          <p className="text-sm text-zinc-500">Bitget public futures feed is unavailable.</p>
         )}
       </div>
 
