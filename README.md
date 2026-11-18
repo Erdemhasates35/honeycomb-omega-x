@@ -1,12 +1,13 @@
 # Honeycomb Omega X — Quant Control Plane
 
-Honeycomb Omega X is a deployed Next.js control-plane UI with a live Binance USDⓈ-M public market-data adapter and an authenticated, read-only Binance account adapter. It is **not yet an autonomous or live order-execution system**.
+Honeycomb Omega X is a deployed Next.js control-plane UI with live Binance USDⓈ-M and Bitget USDT-Futures public market-data adapters plus an authenticated, read-only Binance account adapter. It is **not yet an autonomous or live order-execution system**.
 
 ## Verified integration boundary
 
-- `GET /api/market` reads live Binance USDⓈ-M prices for BTCUSDT, ETHUSDT, SOLUSDT, BNBUSDT and XRPUSDT.
+- `GET /api/market` reads live Binance USDⓈ-M and Bitget USDT-Futures prices for BTCUSDT, ETHUSDT, SOLUSDT, BNBUSDT and XRPUSDT.
 - `GET /api/exchange/binance/account` is a server-side signed, read-only integration for USDⓈ-M balances and open positions. It requires a Supabase-authenticated session and server-side Binance credentials.
 - The account adapter calls only Binance GET endpoints. It does not place, amend or cancel orders.
+- Bitget is currently connected for public futures market data only; private Bitget account access is not configured.
 - Dashboard refreshes live service snapshots every 10 seconds.
 - Trade and command-bar actions remain disabled.
 - The Supabase telemetry and positions APIs require the migration in `supabase/migrations/`; the migration file is committed but has not been applied to the configured production project.
