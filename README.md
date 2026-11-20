@@ -49,7 +49,7 @@ It creates `telemetry_events`, `positions`, and `guard_intents`, indexes, grants
 
 ## Local development
 
-Requires Node.js compatible with the Next.js 14.2.5 version range declared in `package.json`.
+Requires Node.js 20.9+ and Next.js 15.5.29 as pinned in `package.json`.
 
     npm install
     npm run typecheck
