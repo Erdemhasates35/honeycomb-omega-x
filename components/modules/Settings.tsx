@@ -11,16 +11,8 @@ const REQUIRED_ENV = [
   },
   {
     name: "NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY",
-    description: "Supabase anon / publishable key",
+    description: "Supabase publishable key",
     where: "Vercel Environment Variables",
-  },
-];
-
-const OPTIONAL_ENV = [
-  {
-    name: "SUPABASE_SERVICE_ROLE_KEY",
-    description: "Service-role key (server-only, never expose to browser)",
-    where: "Vercel Environment Variables only",
   },
 ];
 
@@ -101,71 +93,22 @@ export default function Settings() {
         </div>
       </div>
 
-      <div className="rounded-xl border border-honeycomb-border bg-honeycomb-panel p-5">
-        <h2 className="mb-4 text-sm font-semibold text-white">Optional (Server-only)</h2>
-        <div className="space-y-3">
-          {OPTIONAL_ENV.map((item) => (
-            <div
-              key={item.name}
-              className="rounded-lg border border-honeycomb-border bg-honeycomb-bg px-4 py-3"
-            >
-              <div className="font-mono text-sm text-zinc-300">{item.name}</div>
-              <div className="mt-1 text-xs text-zinc-400">{item.description}</div>
-              <div className="mt-1 text-xs text-zinc-500">Where: {item.where}</div>
-            </div>
-          ))}
-        </div>
-      </div>
-
       <div className="rounded-xl border border-amber-500/30 bg-amber-500/5 p-4">
         <div className="text-sm font-semibold text-amber-400">Security rule</div>
         <p className="mt-1 text-sm text-zinc-400">
-          This application never collects API keys, secrets, or tokens in the browser.
-          All secrets must be set in Vercel Environment Variables (and Supabase dashboard for project keys).
-          After adding variables, trigger a Redeploy.
+          This application does not currently read SUPABASE_SERVICE_ROLE_KEY. Do not add a service-role
+          secret unless a reviewed server-only feature explicitly requires it. All secrets must remain
+          in their provider's encrypted server-side environment; never expose them to browser code.
         </p>
       </div>
 
       <div className="rounded-xl border border-honeycomb-border bg-honeycomb-panel p-5">
-        <h2 className="mb-3 text-sm font-semibold text-white">Supabase Tables (run once in SQL Editor)</h2>
-        <pre className="overflow-x-auto rounded-lg bg-black/50 p-4 text-xs text-zinc-300">
-{`create table if not exists telemetry_events (
-  id uuid primary key default gen_random_uuid(),
-  event_id text not null,
-  source text not null,
-  level text not null check (level in ('info','warn','error','system')),
-  message text not null,
-  created_at timestamptz not null default now(),
-  meta jsonb default '{}'::jsonb
-);
-
-create table if not exists positions (
-  id uuid primary key default gen_random_uuid(),
-  symbol text not null,
-  side text not null check (side in ('LONG','SHORT')),
-  size numeric not null,
-  entry_price numeric not null,
-  mark_price numeric,
-  unrealized_pnl numeric,
-  updated_at timestamptz not null default now(),
-  source text not null
-);
-
-create table if not exists guard_intents (
-  id uuid primary key default gen_random_uuid(),
-  intent_id text not null,
-  symbol text not null,
-  side text not null,
-  quantity numeric not null,
-  order_type text,
-  meta jsonb default '{}'::jsonb,
-  decision text not null,
-  reason text,
-  created_at timestamptz not null default now()
-);`}
-        </pre>
-        <p className="mt-2 text-xs text-zinc-500">
-          Copy → Supabase Dashboard → SQL Editor → Run. Then enable RLS as needed.
+        <h2 className="mb-3 text-sm font-semibold text-white">Database Migration</h2>
+        <p className="text-sm text-zinc-400">
+          The canonical schema, indexes, grants, and row-level security policies are maintained in
+          <code className="mx-1 text-honeycomb-yellow">supabase/migrations/20261119000000_honeycomb_core_tables.sql</code>.
+          Apply that migration to the dedicated Honeycomb Supabase project only after confirming the
+          project reference and reviewing the RLS policy scope. Do not create tables manually from this UI.
         </p>
       </div>
     </div>
