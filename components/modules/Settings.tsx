@@ -98,7 +98,7 @@ export default function Settings() {
         <p className="mt-1 text-sm text-zinc-400">
           This application does not currently read SUPABASE_SERVICE_ROLE_KEY. Do not add a service-role
           secret unless a reviewed server-only feature explicitly requires it. All secrets must remain
-          in their provider's encrypted server-side environment; never expose them to browser code.
+          in a provider-controlled encrypted server-side environment; never expose them to browser code.
         </p>
       </div>
 
