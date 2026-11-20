@@ -11,9 +11,11 @@
     "verify": "node scripts/verify-no-demo-data.mjs"
   },
   "dependencies": {
+ dependabot/npm_and_yarn/npm_and_yarn-5988e9b934
+    "next": "15.5.21",
     "@supabase/ssr": "^0.5.2",
     "@supabase/supabase-js": "^2.45.4",
-    "next": "14.2.35",
+    "next": "15.5.21",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
     "clsx": "^2.1.1",
