@@ -15,6 +15,13 @@ const files = [
   "components/modules/Trade.tsx",
   "components/modules/Admin.tsx",
   "components/modules/Settings.tsx",
+  "app/page.tsx",
+  "app/api/health/route.ts",
+  "app/api/market/route.ts",
+  "app/api/telemetry/route.ts",
+  "app/api/positions/route.ts",
+  "app/api/guard/decide/route.ts",
+  "app/api/exchange/binance/account/route.ts",
 ];
 
 const forbidden = [
@@ -37,7 +44,7 @@ for (const file of files) {
       if (pattern.test(source)) failures.push(file + ": " + label);
     }
   } catch (e) {
-    // file may not exist yet; skip
+    failures.push(file + ": required production path is missing");
   }
 }
 if (failures.length) {
