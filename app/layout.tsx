@@ -3,7 +3,8 @@ import "./globals.css";
 
 export const metadata: Metadata = {
   title: "α-HONEYCOMB OMEGA X∞ | Quant Control Plane",
-  description: "Corporate Autonomous Quant Execution Platform — Edge Engine • Risk State Machine • Multi-Agent",
+  description:
+    "Live Binance USDⓈ-M market data, authenticated read-only account telemetry, and a fail-closed execution control plane.",
 };
 
 export default function RootLayout({

@@ -11,16 +11,22 @@ import Agents from "@/components/modules/Agents";
 import Execution from "@/components/modules/Execution";
 import SelfHealing from "@/components/modules/SelfHealing";
 import Settings from "@/components/modules/Settings";
+import Admin from "@/components/modules/Admin";
+import LiveLogs from "@/components/modules/LiveLogs";
+import Trade from "@/components/modules/Trade";
 import CommandBar from "@/components/CommandBar";
 
 type Module =
   | "dashboard"
+  | "trade"
   | "positions"
   | "signals"
   | "risk"
   | "agents"
   | "execution"
   | "selfhealing"
+  | "logs"
+  | "admin"
   | "settings";
 
 export default function Home() {
@@ -30,6 +36,8 @@ export default function Home() {
     switch (active) {
       case "dashboard":
         return <Dashboard />;
+      case "trade":
+        return <Trade />;
       case "positions":
         return <Positions />;
       case "signals":
@@ -42,6 +50,10 @@ export default function Home() {
         return <Execution />;
       case "selfhealing":
         return <SelfHealing />;
+      case "logs":
+        return <LiveLogs />;
+      case "admin":
+        return <Admin />;
       case "settings":
         return <Settings />;
       default:

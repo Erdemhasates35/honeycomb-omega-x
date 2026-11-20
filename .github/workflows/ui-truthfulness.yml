@@ -1,0 +1,38 @@
+name: UI truthfulness and build verification
+
+on:
+  pull_request:
+    paths:
+      - "app/**"
+      - "components/**"
+      - "scripts/verify-no-demo-data.mjs"
+      - "package.json"
+      - ".github/workflows/ui-truthfulness.yml"
+  push:
+    branches: [main]
+    paths:
+      - "app/**"
+      - "components/**"
+      - "scripts/verify-no-demo-data.mjs"
+      - "package.json"
+      - ".github/workflows/ui-truthfulness.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  ui-quality:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+      - name: Verify no generated or fabricated telemetry
+        run: node scripts/verify-no-demo-data.mjs
+      - name: Install dependencies
+        run: npm install --no-audit --no-fund
+      - name: Type check
+        run: npm run typecheck
+      - name: Production build
+        run: npm run build
