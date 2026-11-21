@@ -6,6 +6,12 @@ export interface HealthResponse {
   timestamp: string;
   service: string;
   message?: string;
+  checks: {
+    auth: "connected" | "unavailable";
+    telemetryEvents: "connected" | "unavailable";
+    positions: "connected" | "unavailable";
+    guardIntents: "connected" | "unavailable";
+  };
 }
 
 export interface TelemetryEvent {
