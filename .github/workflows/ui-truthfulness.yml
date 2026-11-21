@@ -7,6 +7,7 @@ on:
       - "components/**"
       - "scripts/verify-no-demo-data.mjs"
       - "package.json"
+      - "package-lock.json"
       - ".github/workflows/ui-truthfulness.yml"
   push:
     branches: [main]
@@ -15,6 +16,7 @@ on:
       - "components/**"
       - "scripts/verify-no-demo-data.mjs"
       - "package.json"
+      - "package-lock.json"
       - ".github/workflows/ui-truthfulness.yml"
 
 permissions:
@@ -30,8 +32,16 @@ jobs:
           node-version: "20"
       - name: Verify no generated or fabricated telemetry
         run: node scripts/verify-no-demo-data.mjs
-      - name: Install dependencies
-        run: npm install --no-audit --no-fund
+      - name: Resolve exact dependency graph
+        run: npm install --package-lock-only --ignore-scripts --no-audit --no-fund
+      - name: Upload generated lockfile for review
+        uses: actions/upload-artifact@v4
+        with:
+          name: honeycomb-package-lock
+          path: package-lock.json
+          if-no-files-found: error
+      - name: Install dependencies from lockfile
+        run: npm ci --no-audit --no-fund
       - name: Type check
         run: npm run typecheck
       - name: Production build
