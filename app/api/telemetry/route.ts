@@ -11,6 +11,10 @@ export async function GET() {
   try {
     const { createServerClient } = await import("@/lib/supabase/server");
     const supabase = await createServerClient();
+    const { data: userData, error: authError } = await supabase.auth.getUser();
+    if (authError || !userData.user) {
+      return NextResponse.json({ status: "unauthorized", events: [], message: "An authenticated operator session is required" }, { status: 401 });
+    }
 
     const { data, error } = await supabase
       .from("telemetry_events")
@@ -27,7 +31,7 @@ export async function GET() {
           message: error.message,
           timestamp: new Date().toISOString(),
         },
-        { status: 503 }
+        { status: error.code === "42501" ? 403 : 503 }
       );
     }
 

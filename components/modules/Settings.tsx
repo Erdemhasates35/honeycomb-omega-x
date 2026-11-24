@@ -34,6 +34,12 @@ export default function Settings() {
             timestamp: new Date().toISOString(),
             service: "honeycomb-omega-x",
             message: "Health endpoint unreachable",
+            checks: {
+              auth: "unavailable",
+              telemetryEvents: "unavailable",
+              positions: "unavailable",
+              guardIntents: "unavailable",
+            },
           });
         }
       }
