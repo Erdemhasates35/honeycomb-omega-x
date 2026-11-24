@@ -19,26 +19,28 @@ export async function GET() {
     try {
       const { createServerClient } = await import("@/lib/supabase/server");
       const supabase = await createServerClient();
-      const [authResult, telemetryResult, positionsResult, guardResult] =
-        await Promise.all([
-          supabase.auth.getSession(),
-          supabase.from("telemetry_events").select("id").limit(0),
-          supabase.from("positions").select("id").limit(0),
-          supabase.from("guard_intents").select("id").limit(0),
-        ]);
+      const [authResult, schemaResult] = await Promise.all([
+        supabase.auth.getSession(),
+        supabase.rpc("honeycomb_dashboard_schema_health"),
+      ]);
 
       checks.auth = authResult.error ? "unavailable" : "connected";
-      checks.telemetryEvents = telemetryResult.error ? "unavailable" : "connected";
-      checks.positions = positionsResult.error ? "unavailable" : "connected";
-      checks.guardIntents = guardResult.error ? "unavailable" : "connected";
+      const schema = schemaResult.data as {
+        positions?: boolean;
+        telemetry_events?: boolean;
+        guard_intents?: boolean;
+      } | null;
+      checks.telemetryEvents = !schemaResult.error && schema?.telemetry_events === true ? "connected" : "unavailable";
+      checks.positions = !schemaResult.error && schema?.positions === true ? "connected" : "unavailable";
+      checks.guardIntents = !schemaResult.error && schema?.guard_intents === true ? "connected" : "unavailable";
 
       const unavailable = Object.entries(checks)
         .filter(([, state]) => state !== "connected")
         .map(([name]) => name);
 
       message = unavailable.length
-        ? "Supabase reachable; required data-plane checks unavailable: " + unavailable.join(", ")
-        : "Supabase Auth and required data tables reachable";
+        ? "Supabase connection or required schema unavailable: " + unavailable.join(", ")
+        : "Supabase Auth and required dashboard schemas available; private records require an authenticated admin session";
     } catch (e) {
       message = e instanceof Error ? e.message : "Supabase client initialization failed";
     }
