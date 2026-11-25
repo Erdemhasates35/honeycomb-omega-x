@@ -1,17 +1,19 @@
 # Honeycomb Omega X — Supabase Backend Layer
 
-Updated: 2026-11-18
+Updated: 2026-11-25
 
-## What was added
+## What is connected
 
-- `lib/supabase/server.ts` + `client.ts` (SSR-safe, fail-closed if env missing)
-- `app/api/health` — connectivity probe
-- `app/api/telemetry` — reads `telemetry_events` table (empty if table missing)
-- `app/api/positions` — reads `positions` table (empty if table missing)
-- `app/api/guard/decide` — fail-closed Guard stub (always rejects until real policy is connected)
-- `.env.example` with required variable names only
+- `lib/supabase/server.ts` + `client.ts` provide SSR-safe, fail-closed clients.
+- `app/api/health` checks Auth and the required data-plane tables.
+- `app/api/telemetry` reads `telemetry_events`.
+- `app/api/positions` reads `positions`.
+- `app/api/guard/decide` requires an authenticated user, records a durable idempotent rejection in `guard_intents`, and always rejects until an independent Guard policy engine is connected.
+- `lib/supabase/admin.ts` is server-only and uses the service-role key exclusively for the Guard audit write.
 
-## Required Supabase tables (create in Supabase SQL editor)
+## Required Supabase tables
+
+The production project already contains these tables. The SQL below documents their minimum contract; do not rerun it over an existing production schema without comparing migrations first.
 
 ```sql
 create table if not exists telemetry_events (
@@ -38,33 +40,33 @@ create table if not exists positions (
 
 create table if not exists guard_intents (
   id uuid primary key default gen_random_uuid(),
-  intent_id text not null,
+  intent_id text not null unique,
   symbol text not null,
-  side text not null,
-  quantity numeric not null,
+  side text not null check (side in ('BUY','SELL')),
+  quantity numeric not null check (quantity > 0),
   order_type text,
   meta jsonb default '{}'::jsonb,
-  decision text not null,
+  decision text not null check (decision in ('approve','reject')),
   reason text,
   created_at timestamptz not null default now()
 );
 ```
 
-Enable RLS and add policies appropriate to your auth model.
+## Server configuration
 
-## Operator steps (no Termux required)
+Set these in Vercel or local `.env.local`:
 
-1. Create a Supabase project.
-2. Run the SQL above.
-3. In Vercel (or local `.env.local`) set:
-   - `NEXT_PUBLIC_SUPABASE_URL`
-   - `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`
-4. Deploy / restart.
-5. `GET /api/health` must return `"status": "connected"`.
+- `NEXT_PUBLIC_SUPABASE_URL`
+- `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`
+- `SUPABASE_SERVICE_ROLE_KEY` — server-only; never prefix with `NEXT_PUBLIC_`, never expose to a browser, and never commit a value.
+
+The Guard endpoint requires a valid Supabase user session. It uses the service-role client only after authentication to persist the rejection audit row. If the audit write fails, the endpoint returns `503` and still does not approve the intent.
 
 ## Design invariants
 
 - No fabricated telemetry, positions, or PnL.
 - Guard always rejects until a real independent policy engine is attached.
-- Service-role key is optional and never sent to the browser.
+- Guard audit writes are idempotent by `intent_id`; duplicate requests do not overwrite the original audit row.
+- RLS remains enabled; service-role credentials are used only in server-side code.
+- No live order is submitted by this endpoint.
 - All secrets live only in Vercel / Supabase dashboard.
